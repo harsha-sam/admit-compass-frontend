@@ -60,7 +60,7 @@ export default function AttributesPage() {
 
   const fetchAttributes = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attributes")
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes`)
       if (response.ok) {
         const data = await response.json()
       
@@ -80,7 +80,7 @@ export default function AttributesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attribute-categories")
+      const response = await fetch(`${process.env.BASE_URL}/api/attribute-categories`)
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -110,7 +110,7 @@ export default function AttributesPage() {
 
   const handleDelete = async (attributeId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/attributes/${attributeId}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes/${attributeId}`, {
         method: "DELETE",
       })
       if (response.ok) {

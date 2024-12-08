@@ -63,7 +63,7 @@ export default function ProgramsPage() {
 
   const fetchPrograms = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/programs')
+      const response = await fetch(`${process.env.BASE_URL}/api/programs`)
       if (response.ok) {
         const data = await response.json()
         setPrograms(data)
@@ -85,7 +85,7 @@ export default function ProgramsPage() {
 
   const fetchRulesets = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/rulesets")
+      const response = await fetch(`${process.env.BASE_URL}/api/rulesets`)
       if (response.ok) {
         const data = await response.json()
         setRulesets(data)
@@ -109,8 +109,8 @@ export default function ProgramsPage() {
   const handleSubmitProgram = async (data: ProgramFormData) => {
     try {
       const url = currentProgram
-        ? `http://localhost:8000/api/programs/${currentProgram.programId}`
-        : 'http://localhost:8000/api/programs'
+        ? `${process.env.BASE_URL}/api/programs/${currentProgram.programId}`
+        : `${process.env.BASE_URL}/api/programs`
       const method = currentProgram ? 'PATCH' : 'POST'
 
       const response = await fetch(url, {
@@ -147,7 +147,7 @@ export default function ProgramsPage() {
 
   const handleDeleteProgram = async (programId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/programs/${programId}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/programs/${programId}`, {
         method: 'DELETE',
       })
 

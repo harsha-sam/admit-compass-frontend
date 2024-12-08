@@ -96,7 +96,7 @@ export default function CreateRuleset() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('http://localhost:8000/api/rulesets', {
+      const response = await fetch(`${process.env.BASE_URL}/api/rulesets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export default function CreateRuleset() {
 
   const fetchPrograms = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/programs')
+      const response = await fetch(`${process.env.BASE_URL}/api/programs`)
       if (response.ok) {
         const data = await response.json()
         setPrograms(data.map((program: any) => ({ id: program.programId, name: program.name })))

@@ -18,7 +18,7 @@ export default function CreateAttributePage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attribute-categories")
+      const response = await fetch(`${process.env.BASE_URL}/api/attribute-categories`)
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -37,7 +37,7 @@ export default function CreateAttributePage() {
 
   const fetchAttributes = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attributes")
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes`)
       if (response.ok) {
         const data = await response.json()
         setAttributes(data)
@@ -62,7 +62,7 @@ export default function CreateAttributePage() {
       }
       delete newData["rule"]
       delete newData["attributeId"]
-      const response = await fetch("http://localhost:8000/api/attributes", {
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

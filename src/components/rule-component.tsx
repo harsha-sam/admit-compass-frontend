@@ -1,33 +1,46 @@
-import React, { useCallback } from 'react'
-import { Draggable } from 'react-beautiful-dnd'
+import React, { useCallback, memo } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Trash2, Copy, GripVertical } from 'lucide-react'
-import { Rule, Attribute, Ruleset } from './types'
+import { Rule, Attribute, Ruleset, Group } from './types'
 
 interface RuleComponentProps {
   rule: Rule
   attributes: Attribute[]
   updateRuleset: (ruleset: Ruleset) => void
   ruleset: Ruleset
-  index: number
 }
 
-const RuleComponent: React.FC<RuleComponentProps> = ({
+const RuleComponent: React.FC<RuleComponentProps> = memo(({
   rule,
   attributes,
   updateRuleset,
   ruleset,
-  index,
 }) => {
-  console.log("r", rule)
+  const {
+    attributes: sortableAttributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: rule.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   const attribute = attributes.find((a) => a.attributeId.toString() == rule.attributeId)
   const conditions = getConditions(attribute?.type || '')
 
   const updateRule = useCallback((ruleId: string, updates: Partial<Rule>) => {
     const newRootGroup = updateRuleInGroup(ruleset.rootGroup, ruleId, updates)
-    updateRuleset({ ...ruleset, rootGroup: newRootGroup })
+    if (JSON.stringify(newRootGroup) !== JSON.stringify(ruleset.rootGroup)) {
+      updateRuleset({ ...ruleset, rootGroup: newRootGroup })
+    }
   }, [ruleset, updateRuleset])
 
   const removeRule = useCallback((ruleId: string) => {
@@ -36,98 +49,96 @@ const RuleComponent: React.FC<RuleComponentProps> = ({
   }, [ruleset, updateRuleset])
 
   const cloneRule = useCallback((rule: Rule) => {
-    const clonedRule = { ...rule, id: Math.random().toString(36).substr(2, 9) }
+    const clonedRule = { ...rule, id: `rule-${Math.random().toString(36).substr(2, 9)}` }
     const newRootGroup = addRuleToGroup(ruleset.rootGroup, ruleset.rootGroup.id, clonedRule)
     updateRuleset({ ...ruleset, rootGroup: newRootGroup })
   }, [ruleset, updateRuleset])
 
   return (
-    <Draggable draggableId={rule.id} index={index}>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className="flex items-center space-x-1 bg-gray-700 p-1 rounded border border-gray-600"
-        >
-          <GripVertical className="text-gray-400 h-4 w-4" />
-          <Select
-            value={rule.attributeId.toString()}
-            onValueChange={(value) => updateRule(rule.id, { attributeId: value })}
-          >
-            <SelectTrigger className="w-[150px] h-8 text-sm bg-gray-600 text-white">
-              <SelectValue placeholder="Select attribute" />
-            </SelectTrigger>
-            <SelectContent>
-              {attributes.map((attr) => (
-                <SelectItem key={attr.attributeId} value={attr.attributeId.toString()}>
-                  {attr.displayName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={rule.condition}
-            onValueChange={(value) => updateRule(rule.id, { condition: value })}
-          >
-            <SelectTrigger className="w-[120px] h-8 text-sm bg-gray-600 text-white">
-              <SelectValue placeholder="Condition" />
-            </SelectTrigger>
-            <SelectContent>
-              {conditions.map((condition) => (
-                <SelectItem key={condition} value={condition}>
-                  {condition.replace(/_/g, ' ')}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            type="text"
-            value={rule.value}
-            onChange={(e) => updateRule(rule.id, { value: e.target.value })}
-            placeholder="Value"
-            className="w-[100px] h-8 text-sm bg-gray-600 text-white"
-          />
-          <Select
-            value={rule.operation}
-            onValueChange={(value) => updateRule(rule.id, { operation: value as "add" | "subtract" | "multiply" | "divide" })}
-          >
-            <SelectTrigger className="w-[150px] h-8 text-sm bg-gray-600 text-white">
-              <SelectValue placeholder="Select operation" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="add">Increase score by</SelectItem>
-              <SelectItem value="subtract">Decrease score by</SelectItem>
-              <SelectItem value="multiply">Multiply score by</SelectItem>
-              <SelectItem value="divide">Divide score by</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            type="number"
-            value={rule.points}
-            onChange={(e) => {
-              const newValue = parseFloat(e.target.value) || 0
-              if (rule.operation === "divide" && newValue === 0) {
-                alert("Cannot divide by zero. Please enter a non-zero value.")
-                return
-              }
-              updateRule(rule.id, { points: newValue })
-            }}
-            placeholder="Points"
-            className="w-[80px] h-8 text-sm bg-gray-600 text-white"
-          />
-          <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => removeRule(rule.id)}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
-          <Button variant="secondary" size="icon" className="h-8 w-8" onClick={() => cloneRule(rule)}>
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
-    </Draggable>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center space-x-1 bg-gray-700 p-1 rounded border border-gray-600"
+    >
+      <div {...listeners} {...sortableAttributes}>
+        <GripVertical className="text-gray-400 h-4 w-4 cursor-move" />
+      </div>
+      <Select
+        value={rule.attributeId.toString()}
+        onValueChange={(value) => updateRule(rule.id, { attributeId: value })}
+      >
+        <SelectTrigger className="w-[150px] h-8 text-sm bg-gray-600 text-white">
+          <SelectValue placeholder="Select attribute" />
+        </SelectTrigger>
+        <SelectContent>
+          {attributes.map((attr) => (
+            <SelectItem key={attr.attributeId} value={attr.attributeId.toString()}>
+              {attr.displayName}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={rule.condition}
+        onValueChange={(value) => updateRule(rule.id, { condition: value })}
+      >
+        <SelectTrigger className="w-[120px] h-8 text-sm bg-gray-600 text-white">
+          <SelectValue placeholder="Condition" />
+        </SelectTrigger>
+        <SelectContent>
+          {conditions.map((condition) => (
+            <SelectItem key={condition} value={condition}>
+              {condition.replace(/_/g, ' ')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Input
+        type="text"
+        value={rule.value}
+        onChange={(e) => updateRule(rule.id, { value: e.target.value })}
+        placeholder="Value"
+        className="w-[100px] h-8 text-sm bg-gray-600 text-white"
+      />
+      <Select
+        value={rule.operation}
+        onValueChange={(value) => updateRule(rule.id, { operation: value as "add" | "subtract" | "multiply" | "divide" })}
+      >
+        <SelectTrigger className="w-[150px] h-8 text-sm bg-gray-600 text-white">
+          <SelectValue placeholder="Select operation" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="add">Increase score by</SelectItem>
+          <SelectItem value="subtract">Decrease score by</SelectItem>
+          <SelectItem value="multiply">Multiply score by</SelectItem>
+          <SelectItem value="divide">Divide score by</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input
+        type="number"
+        value={rule.points}
+        onChange={(e) => {
+          const newValue = parseFloat(e.target.value) || 0
+          if (rule.operation === "divide" && newValue === 0) {
+            alert("Cannot divide by zero. Please enter a non-zero value.")
+            return
+          }
+          updateRule(rule.id, { points: newValue })
+        }}
+        placeholder="Points"
+        className="w-[80px] h-8 text-sm bg-gray-600 text-white"
+      />
+      <Button variant="destructive" size="icon" className="h-8 w-8" onClick={() => removeRule(rule.id)}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+      <Button variant="secondary" size="icon" className="h-8 w-8" onClick={() => cloneRule(rule)}>
+        <Copy className="h-4 w-4" />
+      </Button>
+    </div>
   )
-}
+})
 
+RuleComponent.displayName = "RuleComponent"
 export default RuleComponent
 
 // Helper functions
@@ -166,7 +177,12 @@ const removeRuleFromGroup = (group: Group, ruleId: string): Group => {
   return {
     ...group,
     rules: group.rules
-      .filter((item) => !isGroup(item) && item.id !== ruleId)
+      .filter((item) => {
+        if (isGroup(item)) {
+          return true; // Keep all groups
+        }
+        return item.id !== ruleId; // Remove only the specific rule
+      })
       .map((item) => isGroup(item) ? removeRuleFromGroup(item, ruleId) : item),
   }
 }

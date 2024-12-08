@@ -8,14 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card } from "@/components/ui/card"
 import { Attribute } from '@/components/types'
+import { Button } from './ui/button'
+import { Loader2 } from 'lucide-react'
 
 interface DynamicRulesetFormProps {
   attributes: Attribute[]
   formOrder: number[]
-  onSubmit?: (data: any) => void
+  onSubmit?: (data: any) => void,
+  isSubmitting ?: boolean
 }
 
-export function DynamicRulesetForm({ attributes, formOrder, onSubmit }: DynamicRulesetFormProps) {
+export function DynamicRulesetForm({ attributes, formOrder, onSubmit, isSubmitting }: DynamicRulesetFormProps) {
   const [formState, setFormState] = useState<Record<number, any>>({})
   const [renderKey, setRenderKey] = useState(0)
 
@@ -117,6 +120,7 @@ export function DynamicRulesetForm({ attributes, formOrder, onSubmit }: DynamicR
             type="number"
             id={attribute.attributeId.toString()}
             value={formState[attribute.attributeId] || ''}
+            step={0.01}
             onChange={(e) => updateFormState(attribute.attributeId, parseFloat(e.target.value) || '')}
             placeholder={`Enter ${attribute.displayName}`}
             min={attribute.validationRule?.min}
@@ -204,6 +208,19 @@ export function DynamicRulesetForm({ attributes, formOrder, onSubmit }: DynamicR
           </Card>
         )
       })}
+      {
+        onSubmit &&
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            'Submit Application'
+          )}
+        </Button>
+      }
     </form>
   )
 }

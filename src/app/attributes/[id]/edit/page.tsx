@@ -20,7 +20,7 @@ export default function EditAttributePage({ params }: { params: { id: string } }
 
   const fetchAttribute = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/attributes/${params.id}`)
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes/${params.id}`)
       if (response.ok) {
         const data = await response.json()
         setAttribute(data)
@@ -39,7 +39,7 @@ export default function EditAttributePage({ params }: { params: { id: string } }
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attribute-categories")
+      const response = await fetch(`${process.env.BASE_URL}/api/attribute-categories`)
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -58,7 +58,7 @@ export default function EditAttributePage({ params }: { params: { id: string } }
 
   const fetchAttributes = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attributes")
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes`)
       if (response.ok) {
         const data = await response.json()
         setAttributes(data)
@@ -82,7 +82,7 @@ export default function EditAttributePage({ params }: { params: { id: string } }
         rules: [data.rule]
       }
       delete newData["rule"]
-      const response = await fetch(`http://localhost:8000/api/attributes/${params.id}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes/${params.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

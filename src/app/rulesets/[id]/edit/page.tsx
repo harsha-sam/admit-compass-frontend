@@ -155,7 +155,7 @@ export default function EditRuleset({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchRuleset = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/rulesets/${params.id}`)
+        const response = await fetch(`${process.env.BASE_URL}/api/rulesets/${params.id}`)
         if (!response.ok) {
           throw new Error('Failed to fetch ruleset')
         }
@@ -214,7 +214,7 @@ export default function EditRuleset({ params }: { params: { id: string } }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`http://localhost:8000/api/rulesets/${params.id}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/rulesets/${params.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -262,7 +262,7 @@ export default function EditRuleset({ params }: { params: { id: string } }) {
 
   const fetchPrograms = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/programs')
+      const response = await fetch(`${process.env.BASE_URL}/api/programs`)
       if (response.ok) {
         const data = await response.json()
         setPrograms(data.map((program: any) => ({ id: program.programId, name: program.name })))

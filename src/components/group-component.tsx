@@ -1,5 +1,7 @@
-import React, { useCallback } from 'react'
-import { Draggable, Droppable } from 'react-beautiful-dnd'
+import React, { useCallback, memo } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { useDroppable } from '@dnd-kit/core'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
@@ -13,25 +15,47 @@ interface GroupComponentProps {
   isRoot: boolean
   updateRuleset: (ruleset: Ruleset) => void
   ruleset: Ruleset
-  index: number
 }
 
-const GroupComponent: React.FC<GroupComponentProps> = ({
+const GroupComponent: React.FC<GroupComponentProps> = memo(({
   group,
   attributes,
   isRoot,
   updateRuleset,
   ruleset,
-  index,
 }) => {
+  const {
+    attributes: sortableAttributes,
+    listeners,
+    setNodeRef: setSortableRef,
+    transform,
+    transition,
+  } = useSortable({ id: group.id })
+
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: group.id,
+  })
+
+  const setRef = (el: HTMLElement | null) => {
+    setSortableRef(el)
+    setDroppableRef(el)
+  }
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
   const updateGroup = useCallback((groupId: string, updates: Partial<Group>) => {
     const newRootGroup = updateGroupInGroup(ruleset.rootGroup, groupId, updates)
-    updateRuleset({ ...ruleset, rootGroup: newRootGroup })
+    if (JSON.stringify(newRootGroup) !== JSON.stringify(ruleset.rootGroup)) {
+      updateRuleset({ ...ruleset, rootGroup: newRootGroup })
+    }
   }, [ruleset, updateRuleset])
 
   const addRule = useCallback((groupId: string) => {
     const newRule: Rule = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: `rule-${Math.random().toString(36).substr(2, 9)}`,
       attributeId: attributes[0]?.attributeId.toString() || '',
       condition: "equals",
       value: "",
@@ -44,7 +68,7 @@ const GroupComponent: React.FC<GroupComponentProps> = ({
 
   const addGroup = useCallback((parentGroupId: string) => {
     const newGroup: Group = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: `group-${Math.random().toString(36).substr(2, 9)}`,
       combinator: "AND",
       rules: [],
     }
@@ -60,9 +84,9 @@ const GroupComponent: React.FC<GroupComponentProps> = ({
   const cloneGroup = useCallback((group: Group) => {
     const cloneGroupRecursive = (g: Group): Group => ({
       ...g,
-      id: Math.random().toString(36).substr(2, 9),
+      id: `group-${Math.random().toString(36).substr(2, 9)}`,
       rules: g.rules.map(item => 
-        isGroup(item) ? cloneGroupRecursive(item) : { ...item, id: Math.random().toString(36).substr(2, 9) }
+        isGroup(item) ? cloneGroupRecursive(item) : { ...item, id: `rule-${Math.random().toString(36).substr(2, 9)}` }
       ),
     })
     const clonedGroup = cloneGroupRecursive(group)
@@ -70,13 +94,13 @@ const GroupComponent: React.FC<GroupComponentProps> = ({
     updateRuleset({ ...ruleset, rootGroup: newRootGroup })
   }, [ruleset, updateRuleset])
 
-  const renderGroupContent = (dragHandleProps?: any) => (
+  const renderGroupContent = () => (
     <Card className="p-4 mb-4 bg-gray-800 text-white">
       <CardContent>
         <div className="flex items-center mb-4">
           {!isRoot && (
-            <div {...dragHandleProps}>
-              <GripVertical className="text-gray-400 mr-2" />
+            <div {...listeners} {...sortableAttributes}>
+              <GripVertical className="text-gray-400 mr-2 cursor-move" />
             </div>
           )}
           <Select
@@ -100,35 +124,28 @@ const GroupComponent: React.FC<GroupComponentProps> = ({
             <Copy className="h-4 w-4" />
           </Button>
         </div>
-        <Droppable droppableId={group.id} type="RULE">
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-              {group.rules.map((rule, index) => (
-                <React.Fragment key={rule.id}>
-                  {isGroup(rule) ? (
-                    <GroupComponent
-                      group={rule}
-                      attributes={attributes}
-                      isRoot={false}
-                      updateRuleset={updateRuleset}
-                      ruleset={ruleset}
-                      index={index}
-                    />
-                  ) : (
-                    <RuleComponent
-                      rule={rule}
-                      attributes={attributes}
-                      updateRuleset={updateRuleset}
-                      ruleset={ruleset}
-                      index={index}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
+        <div className="space-y-2">
+          {group.rules.map((rule) => (
+            <React.Fragment key={rule.id}>
+              {isGroup(rule) ? (
+                <GroupComponent
+                  group={rule}
+                  attributes={attributes}
+                  isRoot={false}
+                  updateRuleset={updateRuleset}
+                  ruleset={ruleset}
+                />
+              ) : (
+                <RuleComponent
+                  rule={rule}
+                  attributes={attributes}
+                  updateRuleset={updateRuleset}
+                  ruleset={ruleset}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </div>
         <div className="mt-4 space-x-2">
           <Button variant="secondary" size="sm" onClick={() => addRule(group.id)}>
             <Plus className="h-4 w-4 mr-2" /> Add Rule
@@ -146,16 +163,13 @@ const GroupComponent: React.FC<GroupComponentProps> = ({
   }
 
   return (
-    <Draggable draggableId={group.id} index={index} type="GROUP">
-      {(provided) => (
-        <div ref={provided.innerRef} {...provided.draggableProps}>
-          {renderGroupContent(provided.dragHandleProps)}
-        </div>
-      )}
-    </Draggable>
+    <div ref={setRef} style={style}>
+      {renderGroupContent()}
+    </div>
   )
-}
+})
 
+GroupComponent.displayName = "GroupComponent"
 export default GroupComponent
 
 // Helper functions

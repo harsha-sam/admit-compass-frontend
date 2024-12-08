@@ -33,7 +33,7 @@ export function AttributeImporter({ onImport, onRemove, selectedAttributes }: At
 
   const fetchAttributes = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attributes")
+      const response = await fetch(`${process.env.BASE_URL}/api/attributes`)
       if (response.ok) {
         const data = await response.json()
         setAllAttributes(data)
@@ -52,7 +52,7 @@ export function AttributeImporter({ onImport, onRemove, selectedAttributes }: At
   }
 
   const handleImport = (attribute: Attribute) => {
-    let dependentAttrIds: number[] = []
+    const dependentAttrIds: number[] = []
     if (attribute.rules && attribute.rules.length > 0) {
       const rule = attribute.rules[0]
       if (rule.conditions && rule.conditions.length > 0) {
@@ -81,7 +81,7 @@ export function AttributeImporter({ onImport, onRemove, selectedAttributes }: At
       if (selectedAttributes.some((attr) => {
         return attribute.dependsOn?.some((ele) => attr.attributeId === ele.attributeId)
       })) {
-        let string = attribute.dependsOn.map((attr) => attr.displayName).join(', ')
+        const string = attribute.dependsOn.map((attr) => attr.displayName).join(', ')
         toast({
             title: "Error",
             description: `To remove ${attribute.displayName}, first remove it's dependent attributes - ${string} `,

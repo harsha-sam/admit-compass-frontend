@@ -17,7 +17,7 @@ export function Navbar() {
               </Link>
             </Button>
             <SignedOut>
-              <SignInButton mode='modal'redi >
+              <SignInButton mode='modal'>
                   <Button variant="ghost" size="lg">
                     Log in
                   </Button>

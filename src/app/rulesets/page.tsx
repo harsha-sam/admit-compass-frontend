@@ -41,7 +41,7 @@ export default function RulesetsPage() {
 
   const fetchRulesets = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/rulesets")
+      const response = await fetch(`${process.env.BASE_URL}/api/rulesets`)
       if (response.ok) {
         const data = await response.json()
         setRulesets(data)
@@ -70,7 +70,7 @@ export default function RulesetsPage() {
 
   const handleDelete = async (rulesetId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/rulesets/${rulesetId}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/rulesets/${rulesetId}`, {
         method: "DELETE",
       })
       if (response.ok) {

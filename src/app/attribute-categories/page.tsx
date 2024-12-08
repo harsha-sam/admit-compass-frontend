@@ -41,7 +41,7 @@ export default function AttributeCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/attribute-categories")
+      const response = await fetch(`${process.env.BASE_URL}/api/attribute-categories`)
       if (response.ok) {
         const data = await response.json()
         setCategories(data)
@@ -63,8 +63,8 @@ export default function AttributeCategoriesPage() {
 
     const isUpdating = currentCategory.categoryId !== undefined
     const url = isUpdating
-      ? `http://localhost:8000/api/attribute-categories/${currentCategory.categoryId}`
-      : "http://localhost:8000/api/attribute-categories"
+      ? `${process.env.BASE_URL}/api/attribute-categories/${currentCategory.categoryId}`
+      : `${process.env.BASE_URL}/api/attribute-categories`
     
     const method = isUpdating ? "PATCH" : "POST"
 
@@ -100,7 +100,7 @@ export default function AttributeCategoriesPage() {
 
   const handleDeleteCategory = async (categoryId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/attribute-categories/${categoryId}`, {
+      const response = await fetch(`${process.env.BASE_URL}/api/attribute-categories/${categoryId}`, {
         method: "DELETE",
       })
 
