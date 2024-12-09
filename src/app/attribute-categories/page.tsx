@@ -63,8 +63,8 @@ export default function AttributeCategoriesPage() {
 
     const isUpdating = currentCategory.categoryId !== undefined
     const url = isUpdating
-      ? `${process.env.BASE_URL}/api/attribute-categories/${currentCategory.categoryId}`
-      : `${process.env.BASE_URL}/api/attribute-categories`
+      ? `${process.env.API_BASE_URL}/api/attribute-categories/${currentCategory.categoryId}`
+      : `${process.env.API_BASE_URL}/api/attribute-categories`
     
     const method = isUpdating ? "PATCH" : "POST"
 

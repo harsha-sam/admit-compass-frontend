@@ -292,7 +292,6 @@ export default function EditRuleset({ params }: { params: { id: string } }) {
     return <div>Loading...</div>
   }
 
-  console.log("ruleset", ruleset)
   return (
     <div className="container mx-auto py-10 space-y-8">
       <h1 className="text-4xl font-bold">Edit Ruleset</h1>

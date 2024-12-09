@@ -92,7 +92,6 @@ export default function CreateRuleset() {
       rules: [transformToRulesetFormat(ruleset.rootGroup)]
     }
 
-    console.log(payload, "payload")
     setIsLoading(true)
 
     try {

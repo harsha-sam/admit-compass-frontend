@@ -48,7 +48,6 @@ interface ProgramFormProps {
 }
 
 export function ProgramForm({ initialData, onSubmit, onCancel, rulesets }: ProgramFormProps) {
-  console.log(initialData)
   const form = useForm<ProgramFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -70,7 +69,6 @@ export function ProgramForm({ initialData, onSubmit, onCancel, rulesets }: Progr
     }
   }, [initialData, form])
 
-  console.log(form.getValues(), "form")
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
