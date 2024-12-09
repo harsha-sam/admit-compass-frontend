@@ -33,9 +33,11 @@ export function LandingPage() {
           </div>
         </div>
         <div>
-          <p className="text-neutral-500 max-w-3xl mx-auto my-6 text-md">
-            {`Don't have an account? Sign up with your UMBC Email`}
-          </p>
+          <SignUpButton mode='modal'>
+            <Button className="text-neutral-500 max-w-3xl mx-auto my-6 text-md" variant={"link"}>
+                {`Don't have an account? Sign up with your UMBC Email`}
+            </Button>
+          </SignUpButton>
         </div>
       </div>
     </div>
