@@ -169,7 +169,7 @@ export default function ApplyPage() {
           <CardFooter className="flex flex-col items-start">
             <h3 className="text-lg font-semibold mb-2">Evaluation Result</h3>
             <p>{`You have ${evaluationResult.acceptance}% chance of admission`}</p>
-            <p>Recommendation: {evaluationResult.recommendation}</p>
+            <p>Recommendation: {evaluationResult.recommendation || "Improve your GPA for a better admission chance"}</p>
             <Button className="mt-4" onClick={() => router.push('/programs')}>
               Back to Programs
             </Button>
